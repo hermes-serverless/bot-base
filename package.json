@@ -24,7 +24,8 @@
   },
   "homepage": "https://github.com/hermes-serverless/bot-base#readme",
   "dependencies": {
-    "@hermes-serverless/cli-resources": "^0.0.8",
+    "@hermes-serverless/cli-resources": "^0.0.9",
+    "@hermes-serverless/custom-promises": "^0.1.0",
     "@hermes-serverless/fs-utils": "^0.0.2",
     "get-stream": "^5.1.0",
     "wtfnode": "^0.8.0"

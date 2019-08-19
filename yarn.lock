@@ -172,10 +172,10 @@
   dependencies:
     "@types/node" "^12.6.9"
 
-"@hermes-serverless/cli-resources@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@hermes-serverless/cli-resources/-/cli-resources-0.0.8.tgz#a5d89a436822c9c9e7f3e6e59dae46d4480d8e17"
-  integrity sha512-r4rMy05eUFCkgGBzxqsMnVEbTzlFcn1ESuX/jFCjXEpvpfVDT4NdUuSLzErxv8QLBeFPVDUCPN/R5RExB0wifQ==
+"@hermes-serverless/cli-resources@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@hermes-serverless/cli-resources/-/cli-resources-0.0.9.tgz#80fd55f948332af4974d482e46755d245a35b505"
+  integrity sha512-obKQa9L1k79F5o5s2GGxjZB03smIzegvMiKSzPaDZ/ks/HIn9w8XNuBDhPCYtTAG9i+tioeRRxJoO6Bx0YxxeA==
   dependencies:
     "@hermes-serverless/api-types-db-manager" "^0.0.2"
     "@hermes-serverless/api-types-function-watcher" "^0.0.1"

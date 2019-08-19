@@ -1,4 +1,5 @@
 import { AuthDatasource } from '@hermes-serverless/cli-resources'
+import { Waiter } from '@hermes-serverless/custom-promises'
 
 export const getToken = async (username: string, password: string) => {
   try {
@@ -34,5 +35,11 @@ export const timeMeasurer = async (fn: any) => {
   }
   const diff = process.hrtime(start)
   const ms = diff[0] * MS_PER_SEC + Math.round(diff[1] / NS_PER_MS)
-  console.log(ms)
+  console.log(`Time (ms): `, ms)
+}
+
+export const sleep = (ms: number) => {
+  const wait = new Waiter()
+  setTimeout(wait.resolve, ms)
+  return wait.finish()
 }
