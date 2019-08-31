@@ -40,8 +40,8 @@ export class AsyncRunTester {
     this.renewTokenTimer = setInterval(async () => await getToken(this.username, '123', this.logger), 3600 * 1000)
     const functionFolder = path.join(this.opts.sampleFolder, 'function')
     this.hermesConfig = parseHermesConfig(functionFolder)
-    // const pusher = new Pusher(functionFolder, this.username, 'tiagonapoli', { logger: console, outputToStdout: true })
-    // await pusher.addToHermes(true, this.token, 'production')
+    const pusher = new Pusher(functionFolder, this.username, 'tiagonapoli', { logger: console, outputToStdout: true })
+    await pusher.addToHermes(true, this.token, 'production')
   }
 
   private run = async (filename: string) => {
