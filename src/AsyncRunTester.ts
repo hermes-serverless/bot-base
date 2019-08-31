@@ -9,6 +9,8 @@ import wtf from 'wtfnode'
 import { getToken, timeMeasurer, sleep } from './utils'
 import { createDataLogger } from './logger'
 import winston from 'winston'
+import { Waiter } from '@hermes-serverless/custom-promises'
+import retry from 'async-retry'
 
 Environment.baseURL = 'http://localhost:3000'
 
@@ -18,7 +20,7 @@ interface Options {
   sampleFolder: string
 }
 
-export class SyncRunTester {
+export class AsyncRunTester {
   public token: string
   private username: string
   private logger: winston.Logger
@@ -38,12 +40,12 @@ export class SyncRunTester {
     this.renewTokenTimer = setInterval(async () => await getToken(this.username, '123', this.logger), 3600 * 1000)
     const functionFolder = path.join(this.opts.sampleFolder, 'function')
     this.hermesConfig = parseHermesConfig(functionFolder)
-    const pusher = new Pusher(functionFolder, this.username, 'tiagonapoli', { logger: console, outputToStdout: true })
-    await pusher.addToHermes(true, this.token, 'production')
+    // const pusher = new Pusher(functionFolder, this.username, 'tiagonapoli', { logger: console, outputToStdout: true })
+    // await pusher.addToHermes(true, this.token, 'production')
   }
 
   private run = async (filename: string) => {
-    const outStream = await RunDatasource.createSyncRun(
+    const runData = await RunDatasource.createAsyncRun(
       this.username,
       {
         functionOwner: this.username,
@@ -53,17 +55,53 @@ export class SyncRunTester {
       await this.getFileStream('in', filename),
       this.token
     )
-
-    const output = await getStream(outStream)
-    const expected = await getStream(await this.getFileStream('out', filename))
-    if (expected !== output) throw new Error(`Different output\nExpected\n${expected}\n\nGot\n${output}`)
+    return runData
   }
 
-  public loop = async () => {
+  private checkStatus = async (runID: string, expectedOutput: string) => {
+    const status = await RunDatasource.getRunStatus(this.username, runID, this.token, [])
+    this.logger.info(status)
+    if (!status.status) throw new Error('Status invalid')
+    if (status.status === 'error') throw new Error('Error run')
+    if (status.status === 'success') {
+      const output = await retry(
+        async () => {
+          const output = await RunDatasource.getRunResultOutput(this.username, runID, this.token)
+          return output
+        },
+        { retries: 3, minTimeout: 2000 }
+      )
+
+      if (expectedOutput !== output) {
+        throw new Error(`Different output\nExpected\n${expectedOutput}\n\nGot\n${status.out}`)
+      }
+      return true
+    }
+    return false
+  }
+
+  public loop = async (statusInterval: number) => {
     while (this.loopFlag) {
       const inputFiles = fs.readdirSync(path.join(this.opts.sampleFolder, 'in'))
       for (let i = 0; i < inputFiles.length; i += 1) {
-        await timeMeasurer(() => this.run(inputFiles[i]), this.logger)
+        const runData = await this.run(inputFiles[i])
+        const waiter = new Waiter()
+        const expected = await getStream(await this.getFileStream('out', inputFiles[i]))
+        const checkerInterval = setInterval(async () => {
+          try {
+            if (await this.checkStatus(runData.runID, expected)) waiter.resolve()
+          } catch (err) {
+            waiter.reject(err)
+          }
+        }, statusInterval)
+        try {
+          await waiter.finish()
+        } catch (err) {
+          console.log(err)
+          process.exit(1)
+        }
+        this.logger.info('FINISHED')
+        clearInterval(checkerInterval)
         await sleep(this.opts.timeBetweenRequests)
       }
     }

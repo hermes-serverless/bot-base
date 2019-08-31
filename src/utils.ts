@@ -1,28 +1,28 @@
 import { AuthDatasource } from '@hermes-serverless/cli-resources'
 import { Waiter } from '@hermes-serverless/custom-promises'
+import winston from 'winston'
 
-export const getToken = async (username: string, password: string) => {
+export const getToken = async (username: string, password: string, logger: winston.Logger) => {
   try {
     const { auth, token } = await AuthDatasource.login({ username, password })
-    console.log('Logged')
     if (!auth) throw new Error('Login Error')
     return token
   } catch (err) {
-    console.log((err.response && err.response.data) || err)
+    logger.error((err.response && err.response.data) || err)
   }
 
   try {
     const { auth, token } = await AuthDatasource.register({ username, password })
     if (!auth) throw new Error('Register Error')
-    console.log('Registered')
+    logger.info('Registered')
     return token
   } catch (err) {
-    console.log((err.response && err.response.data) || err)
+    logger.error((err.response && err.response.data) || err)
     throw err
   }
 }
 
-export const timeMeasurer = async (fn: any) => {
+export const timeMeasurer = async (fn: any, logger: winston.Logger) => {
   const MS_PER_SEC = 1e3
   const NS_PER_MS = 1e6
 
@@ -30,12 +30,12 @@ export const timeMeasurer = async (fn: any) => {
   try {
     await fn()
   } catch (err) {
-    console.error(err)
+    logger.error(err)
     throw err
   }
   const diff = process.hrtime(start)
   const ms = diff[0] * MS_PER_SEC + Math.round(diff[1] / NS_PER_MS)
-  console.log(`Time (ms): `, ms)
+  logger.info(`Time (ms): ${ms}`)
 }
 
 export const sleep = (ms: number) => {
