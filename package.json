@@ -24,13 +24,18 @@
   },
   "homepage": "https://github.com/hermes-serverless/bot-base#readme",
   "dependencies": {
-    "@hermes-serverless/cli-resources": "^0.0.8",
+    "@hermes-serverless/cli-resources": "^0.0.9",
+    "@hermes-serverless/custom-promises": "^0.1.0",
     "@hermes-serverless/fs-utils": "^0.0.2",
+    "@types/async-retry": "^1.4.1",
+    "async-retry": "^1.2.3",
     "get-stream": "^5.1.0",
+    "winston": "^3.2.1",
     "wtfnode": "^0.8.0"
   },
   "devDependencies": {
     "@types/jest": "^24.0.11",
+    "@types/winston": "^2.4.4",
     "@types/wtfnode": "^0.7.0",
     "jest": "^24.7.1",
     "nodemon": "^1.19.0",
